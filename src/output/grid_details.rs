@@ -10,6 +10,7 @@ use std::io::{self, Write};
 
 use ansi_width;
 use grid::{Direction, Filling, Grid, GridOptions};
+use nu_ansi_term::Style;
 use term_grid as grid;
 
 use crate::fs::feature::git::GitCache;
@@ -124,6 +125,13 @@ impl<'a> Render<'a> {
 
         let drender = self.details_for_column();
 
+        let separator =
+            if let Some(header_color) = self.theme.ui.header.unwrap_or(Style::new()).foreground {
+                format!("{}", Style::new().fg(header_color).dimmed().paint("  │ "))
+            } else {
+                format!("{}", Style::new().dimmed().paint("  │ "))
+            };
+
         let color_scale_info = ColorScaleInformation::from_color_scale(
             self.details.color_scale,
             &self.files,
@@ -179,7 +187,7 @@ impl<'a> Render<'a> {
         let grid = Grid::new(
             cells,
             GridOptions {
-                filling: Filling::Spaces(4),
+                filling: Filling::Text(separator),
                 direction: Direction::TopToBottom,
                 width: self.console_width,
             },
